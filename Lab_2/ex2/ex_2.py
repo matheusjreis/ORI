@@ -1,7 +1,7 @@
 from unidecode import unidecode
 import string
 import os
-
+import math
 
 def readFile(fileName: str) -> list[str]:
     """
@@ -125,23 +125,60 @@ def printDocumentBagOfWords(folderPath: str, vocabulary: list[str]) -> None:
     for fileName in documentFilesName:
         print(f'Bag of words do arquivo {fileName}: {getBagOfWords(vocabulary, getCleanTextFile(f"{folderPath}/{fileName}"))}')
 
-def calculateDocumentTf(documentTerms: list[str], vocabulary: list[str]) -> dict:
-    documentTf: dict = {}
+def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[str]) -> dict[str, int]:
+    documentTerms: list[str] = getCleanTextFile(documentfolderPath)
+    documentProportion: dict = {}
 
     for term in vocabulary:
         occurrenceTermQuantity: int = documentTerms.count(term)
-        documentTf.update({term: occurrenceTermQuantity})
-    return documentTf
+        documentProportion.update({term: occurrenceTermQuantity})
+    return documentProportion
+
+def calculateAllDocumentsTermsProportion(filesFolderPath: str) -> list[dict[str, int]]:
+    tableTermsProportion: list[dict[str, int]] = []
+    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
+
+    for fileName in filesName:
+        tableTermsProportion.append(calculateDocumentTermsProportion(f'{filesFolderPath}/{fileName}', vocabulary))
+    
+    return tableTermsProportion
+
+def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], vocabulary: list[str]) -> dict[str, int]:
+    documentTF: dict = {}
+    print('====================document===========================')
+    for term in vocabulary:
+        termProportion: int = documentTermsProportion.get(term)
+        tfPonderation: float = 0
+
+        if(termProportion <= 0):
+            tfPonderation = 0
+        else:
+            tfPonderation = 1 + math.log(termProportion)
+            print(f'tfPonderation: [{term}]:1 + log([{tfPonderation}]) = [{1 + math.log(termProportion)}]')
+        
+
+        documentTF.update({term: tfPonderation})
+    return documentTF
+
+def printTable(elements: list[any]) -> None:
+    for element in elements:
+        print(element)
+
+def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, int]]:
+    tableTFPonderation: list[dict[str, int]] = []
+    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
+
+    for fileName in filesName:
+        fileTermProportion: dict[str, int] = calculateDocumentTermsProportion(f'{filesFolderPath}/{fileName}', vocabulary)
+        tableTFPonderation.append(calculateDocumentTFPonderation(fileTermProportion, vocabulary))
+    
+    return tableTFPonderation
 
 def main():
-    rootDirectoryPath: str = 'files'
-    resultsFileName: str = 'result.txt'
-
-    vocabulary: list[str] = getMultipleFilesVocabulary(rootDirectoryPath)
-
-    writeFile(resultsFileName, vocabulary)
-    
-    printDocumentBagOfWords(rootDirectoryPath, vocabulary)
+    TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
+    printTable(TfTable)
 
 if __name__ == "__main__":
     main()
