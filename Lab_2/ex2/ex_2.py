@@ -164,6 +164,7 @@ def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], voca
 def printTable(elements: list[any]) -> None:
     for element in elements:
         print(element)
+    print()
 
 def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, int]]:
     tableTFPonderation: list[dict[str, int]] = []
@@ -176,32 +177,88 @@ def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, i
     
     return tableTFPonderation
 
-def calculateDocumentTermAppearances(filesFolderPath: str) -> list[dict[str, int]]:
+def groupAllDocumentsTerms(filesFolderPath: str) -> list[list[str]]:
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
-    vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
-    documentProportion: dict = {}
-    allDocumentsIDF: list[dict[str, int]] = []
-
+    groupedDocumentsTerms: list[list[str]] = []
     for fileName in filesName:
-        documentTerms: list[str] = getCleanTextFile(f'{filesFolderPath}/{fileName}')
-        for term in vocabulary:
-            documentProportion.update({term: documentTerms.count(term)})
-        allDocumentsIDF.append(documentProportion)
-        documentProportion = {}
-    return allDocumentsIDF
+        documentTerms: list[str] = getCleanTextFile(f'{filesFolderPath}/{fileName}')  
+        groupedDocumentsTerms.append(documentTerms)
+    
+    return groupedDocumentsTerms
+
+def initializeDictionary(keys: list[any]) -> dict[any, 0]:
+    filledDictionary: dict[any, 0] = {}
+
+    for key in keys:
+        filledDictionary.update({key: 0})
+
+    return filledDictionary
+
+def getallDocumentsTermAppearences(filesFolderPath: str) -> dict[str, int]:
+    allDocumentsTerms: list[list[str]] = groupAllDocumentsTerms(filesFolderPath)
+    vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
+    allDocumentsTermAppearences: dict[str, int] = initializeDictionary(vocabulary)
+    # TODO - MELHORAR PERFORMANCE DESSA PARTE
+    for term in vocabulary:
+        for documentTerms in allDocumentsTerms:
+            if term in documentTerms:
+                previesTermValue: int = allDocumentsTermAppearences.get(term)
+                allDocumentsTermAppearences.update({term: previesTermValue + 1})
+                
+    return allDocumentsTermAppearences
+
+def multiplyDictionaryValues(firstDict: dict[any, any], secondDict: dict[any, any]) -> dict[any, any]:
+    dictionaryResult: dict[any, any] = {}
+
+    if(len(firstDict) != len(secondDict)):
+        raise Exception("Não é possível realizar multiplicação!")
+ 
+    for key in firstDict:
+        firstDictTermValue: any = firstDict.get(key) 
+        secondDictTermValue: any = secondDict.get(key)
+
+        dictionaryResult.update({key: firstDictTermValue * secondDictTermValue})
+
+    return dictionaryResult
 
 
+
+def calculateTfIdfPonderation(TFTable: list[dict[str, int]] , IDFTable: dict[str, int]) -> list[dict[str, int]]:
+    result: list[dict[str, int]] = []
+
+    for TFDocument in TFTable:
+        result.append(multiplyDictionaryValues(TFDocument, IDFTable))
+
+    return result
+
+
+def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
+    allDocumentsTermAppearences: dict[str, int] = getallDocumentsTermAppearences(filesFolderPath)
+    vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
+    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    documentsQuantity: int = len(filesName)
+    idfPondaration: dict[str, int] = initializeDictionary(vocabulary)
+
+    for term in vocabulary:
+        termValue: int = allDocumentsTermAppearences.get(term)
+        if termValue > 0:
+            idfPondaration.update({term: math.log((documentsQuantity/termValue), 2)})
+
+    return idfPondaration
 
 def main():
     
     TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
-    IDFTable: list[dict[str, int]] = calculateDocumentTermAppearances('files')
+    IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')
 
-    # print("TF")
-    # printTable(TfTable)
+    print("TF")
+    printTable(TfTable)
 
     print("IDF")
-    printTable(IDFTable)
+    printTable([IDFTable])
+
+    print("RESULTADO")
+    printTable(calculateTfIdfPonderation(TfTable, IDFTable))
 
 if __name__ == "__main__":
     main()
