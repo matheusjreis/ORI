@@ -129,7 +129,7 @@ def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[s
     documentTerms: list[str] = getCleanTextFile(documentfolderPath)
     documentProportion: dict = {}
 
-    for term in vocabulary:
+    for term in vocabulary:                             
         occurrenceTermQuantity: int = documentTerms.count(term)
         documentProportion.update({term: occurrenceTermQuantity})
     return documentProportion
@@ -146,7 +146,7 @@ def calculateAllDocumentsTermsProportion(filesFolderPath: str) -> list[dict[str,
 
 def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], vocabulary: list[str]) -> dict[str, int]:
     documentTF: dict = {}
-    print('====================document===========================')
+    # print('====================document===========================')
     for term in vocabulary:
         termProportion: int = documentTermsProportion.get(term)
         tfPonderation: float = 0
@@ -154,8 +154,8 @@ def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], voca
         if(termProportion <= 0):
             tfPonderation = 0
         else:
-            tfPonderation = 1 + math.log(termProportion)
-            print(f'tfPonderation: [{term}]:1 + log([{tfPonderation}]) = [{1 + math.log(termProportion)}]')
+            tfPonderation = 1 + math.log(termProportion, 2  )
+            # print(f'tfPonderation: [{term}]:1 + log([{termProportion}]) = [{1 + math.log(termProportion,2)}]')
         
 
         documentTF.update({term: tfPonderation})
@@ -176,9 +176,32 @@ def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, i
     
     return tableTFPonderation
 
+def calculateDocumentTermAppearances(filesFolderPath: str) -> list[dict[str, int]]:
+    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
+    documentProportion: dict = {}
+    allDocumentsIDF: list[dict[str, int]] = []
+
+    for fileName in filesName:
+        documentTerms: list[str] = getCleanTextFile(f'{filesFolderPath}/{fileName}')
+        for term in vocabulary:
+            documentProportion.update({term: documentTerms.count(term)})
+        allDocumentsIDF.append(documentProportion)
+        documentProportion = {}
+    return allDocumentsIDF
+
+
+
 def main():
+    
     TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
-    printTable(TfTable)
+    IDFTable: list[dict[str, int]] = calculateDocumentTermAppearances('files')
+
+    # print("TF")
+    # printTable(TfTable)
+
+    print("IDF")
+    printTable(IDFTable)
 
 if __name__ == "__main__":
     main()
