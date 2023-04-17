@@ -21,6 +21,12 @@ def getMergedFilesContent(folderPath: str) -> list[str]:
     
     return removeElementFromList(mergedTextContent, '')
 
+def printPonderationDetails(IDFTable: list[dict[str, int]], fileFolderPath: str) -> None:
+
+    print(f"Quantidade de termos: {len(getMultipleFilesVocabulary(fileFolderPath))}")
+    print(f"Termo(s) com maior frequência: {printMaxKeyList(IDFTable)}")
+
+
 def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
     directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
     mergedVocabulary: list[str] = []
@@ -281,8 +287,7 @@ def generateTFIDFHeaderTable(folderPath: str) -> list[str]:
 def convertListToStringList(elements: list[any]) -> list[str]:
     return [str(i) for i in elements]
 
-def printTfIdfTable(TfTable: list[dict[str, int]], IdfTable: list[dict[str, int]]) -> None:
-    TF_IDF_Table: list[dict[str, int]]= calculateTfIdfPonderation(TfTable, IdfTable)
+def printTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:    
     bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
     headerTable: list[str] = generateTFIDFHeaderTable('files')
 
@@ -300,15 +305,26 @@ def printIdfTable(tfIdfTable: list[dict[str, int]]):
 
     drawTable(bodyTable, headerTable, "IDF")
 
+
+# TODO - MELHORAR FUNÇÃO
+def printMaxKeyList(listOfDicts: list[dict[any, any]]):
+    max_value: any = max(d[max(d, key=d.get)] for d in listOfDicts)
+    max_keys: list[any] = [k for d in listOfDicts for k, v in d.items() if v == max_value]
+    return max_keys
+
+
+
 def main():
     
     TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
     IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')    
+    TF_IDF_Table: list[dict[str, int]]= calculateTfIdfPonderation(TfTable, IDFTable)
 
     printTfTable(TfTable)
     printIdfTable([IDFTable])
-    printTfIdfTable(TfTable, IDFTable)
+    printTfIdfTable(TF_IDF_Table)
     
+    printPonderationDetails(TF_IDF_Table, 'files')
 
 if __name__ == "__main__":
     main()
