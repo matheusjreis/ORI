@@ -312,16 +312,14 @@ def printMaxKeyList(listOfDicts: list[dict[any, any]]):
     max_keys: list[any] = [k for d in listOfDicts for k, v in d.items() if v == max_value]
     return max_keys
 
-
-
 def main():
     
     TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
     IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')    
     TF_IDF_Table: list[dict[str, int]]= calculateTfIdfPonderation(TfTable, IDFTable)
 
-    printTfTable(TfTable)
-    printIdfTable([IDFTable])
+    # printTfTable(TfTable)
+    # printIdfTable([IDFTable])
     printTfIdfTable(TF_IDF_Table)
     
     printPonderationDetails(TF_IDF_Table, 'files')
