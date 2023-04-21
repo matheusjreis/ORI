@@ -4,6 +4,7 @@ from rich.table import Table
 import string
 import os
 import math
+import time
 
 def readFile(fileName: str) -> list[str]:
     """
@@ -245,7 +246,10 @@ def modelateDictionaryToList(elements: list[dict[str, int]]) -> list[list[str]]:
         dictionaryValues.append(convertListToStringList(list(element.values())))
         
     return transposeList(dictionaryValues)
-    
+
+def setColumnsWidth(table: Table, width: float) -> None:
+    for i, column in enumerate(table.columns):
+        table.columns[i].width = width
             
         
 def drawTable(tableBody: list[list[any]], Tableheader: list[str], TableTitle: str) -> None:
@@ -258,6 +262,8 @@ def drawTable(tableBody: list[list[any]], Tableheader: list[str], TableTitle: st
         table.add_row(*bodyRow, style='bright_green')
 
     console = Console()
+    setColumnsWidth(table, 13)
+    table.columns[0].width = 20
     console.print(table)
 
 
@@ -313,7 +319,8 @@ def printMaxKeyList(listOfDicts: list[dict[any, any]]):
     return max_keys
 
 def main():
-    
+    start_time: float = time.time()
+
     TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
     IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')    
     TF_IDF_Table: list[dict[str, int]]= calculateTfIdfPonderation(TfTable, IDFTable)
@@ -323,6 +330,11 @@ def main():
     printTfIdfTable(TF_IDF_Table)
     
     printPonderationDetails(TF_IDF_Table, 'files')
+
+    end_time: float = time.time()
+
+    execution_time: float = end_time - start_time
+    print("Execution time:", round(execution_time, 2), "seconds")
 
 if __name__ == "__main__":
     main()
