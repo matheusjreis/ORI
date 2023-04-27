@@ -262,8 +262,8 @@ def drawTable(tableBody: list[list[any]], Tableheader: list[str], TableTitle: st
         table.add_row(*bodyRow, style='bright_green')
 
     console = Console()
-    setColumnsWidth(table, 13)
-    table.columns[0].width = 20
+    setColumnsWidth(table, 12)
+    table.columns[0].width = 18
     console.print(table)
 
 
@@ -297,7 +297,7 @@ def printTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:
     bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
     headerTable: list[str] = generateTFIDFHeaderTable('files')
 
-    drawTable(bodyTable, headerTable, "TF-IDT")
+    drawTable(bodyTable, headerTable, "TF-IDF")
 
 def printTfTable(TfTable: list[dict[str, int]]) -> None:
     bodyTable: list[list[any]] = modelateDictionaryToList(TfTable)
@@ -311,30 +311,37 @@ def printIdfTable(tfIdfTable: list[dict[str, int]]):
 
     drawTable(bodyTable, headerTable, "IDF")
 
-
 # TODO - MELHORAR FUNÇÃO
 def printMaxKeyList(listOfDicts: list[dict[any, any]]):
     max_value: any = max(d[max(d, key=d.get)] for d in listOfDicts)
     max_keys: list[any] = [k for d in listOfDicts for k, v in d.items() if v == max_value]
     return max_keys
 
-def main():
+
+
+def main(): 
+    vocabulary_start_time: float = time.time()
+
+    vocabulary: list[str] = getMultipleFilesVocabulary('files')
+
+    vocabulary_end_time: float = time.time()
+
     start_time: float = time.time()
 
     TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
-    IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')    
+    IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')
     TF_IDF_Table: list[dict[str, int]]= calculateTfIdfPonderation(TfTable, IDFTable)
 
-    # printTfTable(TfTable)
-    # printIdfTable([IDFTable])
     printTfIdfTable(TF_IDF_Table)
-    
     printPonderationDetails(TF_IDF_Table, 'files')
 
     end_time: float = time.time()
 
     execution_time: float = end_time - start_time
-    print("Execution time:", round(execution_time, 2), "seconds")
+    execution_time_vocabulary: float = vocabulary_end_time - vocabulary_start_time
+
+    print("Tempo de execução (Vocabulário):", round(execution_time_vocabulary, 5), "segundos")
+    print("Tempo de execução (TF-IDF):", round(execution_time, 2), "segundos")
 
 if __name__ == "__main__":
     main()

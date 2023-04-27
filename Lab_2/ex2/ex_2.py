@@ -286,7 +286,7 @@ def printTfIdfTable(TfTable: list[dict[str, int]], IdfTable: list[dict[str, int]
     bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
     headerTable: list[str] = generateTFIDFHeaderTable('files')
 
-    drawTable(bodyTable, headerTable, "TF-IDT")
+    drawTable(bodyTable, headerTable, "TF-IDF")
 
 def printTfTable(TfTable: list[dict[str, int]]) -> None:
     bodyTable: list[list[any]] = modelateDictionaryToList(TfTable)
