@@ -7,6 +7,7 @@ import math
 
 FILES_FOLDER_PATH = 'files'
 
+
 def readFile(fileName: str) -> list[str]:
     """
     Recebe o nome de um arquivo e retorna uma lista com o conteúdo dele.
@@ -14,14 +15,16 @@ def readFile(fileName: str) -> list[str]:
     with open(fileName, 'r', encoding="utf8") as file:
         return file.readlines()
 
+
 def getMergedFilesContent(folderPath: str) -> list[str]:
     directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
     mergedTextContent: list[str] = []
 
     for fileName in directoryFilesName:
         mergedTextContent += getCleanTextFile(f"{folderPath}/{fileName}")
-    
+
     return removeElementFromList(mergedTextContent, '')
+
 
 def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
     directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
@@ -29,7 +32,7 @@ def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
 
     for fileName in directoryFilesName:
         mergedVocabulary += getVocabulary(f"{folderPath}/{fileName}")
-    
+
     resultList: list[str] = list(set(mergedVocabulary))
     resultList.sort()
     return removeElementFromList(resultList, '')
@@ -46,9 +49,10 @@ def removeElementFromList(listElements: list[any], element: any) -> list[any]:
             result.append(item)
     return result
 
+
 def getStripedFileWords(fileContent: list[str]) -> list[str]:
     """
-    Recebe uma lista com um elemento, sendo a lista o conteúdo do arquivo e retorna outra 
+    Recebe uma lista com um elemento, sendo a lista o conteúdo do arquivo e retorna outra
     lista com cada palavra (que esteja separada por um espaço) em uma posição.
     """
     mergedContent: str = ""
@@ -56,16 +60,19 @@ def getStripedFileWords(fileContent: list[str]) -> list[str]:
         mergedContent += line
     return clearPunctuation(mergedContent).split(' ')
 
+
 def clearPunctuation(word: str) -> str:
     """
-    Recebe uma string com qualquer texto em questão e retorna esse mesmo texto sem nenhuma 
+    Recebe uma string com qualquer texto em questão e retorna esse mesmo texto sem nenhuma
     pontuação, formatação ou quebra de linha.
     """
     word = word.replace('\n', ' ')
     word = word.lower()
-    word = word.translate(str.maketrans('', '', string.punctuation.replace('-','')))
+    word = word.translate(str.maketrans(
+        '', '', string.punctuation.replace('-', '')))
     word = unidecode(word)
     return word
+
 
 def getVocabulary(fileName: str) -> list[str]:
     """
@@ -78,6 +85,7 @@ def getVocabulary(fileName: str) -> list[str]:
     unrepeteadedText: list[str] = list(set(stripedFileContent))
 
     return unrepeteadedText
+
 
 def writeFile(newfileName: str, fileContent: list[str]) -> None:
     """
@@ -92,18 +100,20 @@ def writeFile(newfileName: str, fileContent: list[str]) -> None:
     except:
         print("Erro ao tentar escrever no arquivo!")
 
+
 def getCleanTextFile(fileName: str) -> list[str]:
     """
     Recebe o nome de um arquivo, faz sua leitura e retorna o conteúdo dele sem pontuação
-    e com as palavras separadas dentro de uma lista.    
+    e com as palavras separadas dentro de uma lista.
     """
     fileContent: list[str] = readFile(fileName)
     stripedFileContent: list[str] = getStripedFileWords(fileContent)
     return stripedFileContent
 
+
 def getBagOfWords(vocabulary: list[str], document: list[str]) -> list[int]:
     """
-    Receba uma lista com os termos do vocabulário, outra com o os termos do documento e 
+    Receba uma lista com os termos do vocabulário, outra com o os termos do documento e
     retorna uma outra lista representando a ausência ou presença dos termos do vocabulário
     no documento em questão.
     """
@@ -118,14 +128,16 @@ def getBagOfWords(vocabulary: list[str], document: list[str]) -> list[int]:
             bafOfWords.append(termAbsence)
     return bafOfWords
 
+
 def getAllFileNamesFromFolder(folderPath: str) -> list[str]:
     """
     Busca o nome de todos os arquivos contidos no diretório do caminho contido em folderPath
     """
     return os.listdir(folderPath)
 
+
 def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[str]) -> dict[str, int]:
-     """
+    """
     Calcula a quantidade de ocorrências de determinado termo do vocabulário no documento contido em documentfolderPath
     e retorna essa relação em um dicionário (chave:valor)
     """
@@ -181,6 +193,36 @@ def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, i
         tableTFPonderation.append(calculateDocumentTFPonderation(fileTermProportion, vocabulary))
     
     return tableTFPonderation
+
+def multiplyDictionaryValues(firstDict: dict[any, any], secondDict: dict[any, any]) -> dict[any, any]:
+    """
+    Realiza a multiplicação da chaves de dois dicionários e retorna um dicionário único com esses valores
+    calculados.
+    """
+    dictionaryResult: dict[any, any] = {}
+
+    if(len(firstDict) != len(secondDict)):
+        raise Exception("Não é possível realizar multiplicação!")
+ 
+    for key in firstDict:
+        firstDictTermValue: any = firstDict.get(key) 
+        secondDictTermValue: any = secondDict.get(key)
+
+        dictionaryResult.update({key: round(firstDictTermValue * secondDictTermValue,3)})
+
+    return dictionaryResult
+
+def calculateTfIdfPonderation(TFTable: list[dict[str, int]] , IDFTable: dict[str, int]) -> list[dict[str, int]]:
+    """
+    Recebe uma tabela com TF e outra com o IDF e retorna o TF_IDF calculado.
+    """
+    result: list[dict[str, int]] = []
+
+    for TFDocument in TFTable:
+        result.append(multiplyDictionaryValues(TFDocument, IDFTable))
+
+    return result
+
 
 def groupAllDocumentsTerms(filesFolderPath: str) -> list[list[str]]:
     """
@@ -317,10 +359,11 @@ def main():
     
     TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation(FILES_FOLDER_PATH)
     IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)    
+    tfIdfTabçe: list[dict[str, int]] = calculateTfIdfPonderation(TfTable, IDFTable)    
 
     printTfTable(TfTable)
     printIdfTable([IDFTable])
-    printTfIdfTable(TfTable, IDFTable)
+    printTfIdfTable(tfIdfTabçe)
 
 if __name__ == "__main__":
     main()
