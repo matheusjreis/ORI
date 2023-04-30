@@ -119,15 +119,17 @@ def getBagOfWords(vocabulary: list[str], document: list[str]) -> list[int]:
     return bafOfWords
 
 def getAllFileNamesFromFolder(folderPath: str) -> list[str]:
+    """
+    Busca o nome de todos os arquivos contidos no diretório do caminho contido em folderPath
+    """
     return os.listdir(folderPath)
 
-def printDocumentBagOfWords(folderPath: str, vocabulary: list[str]) -> None:
-    documentFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
-
-    for fileName in documentFilesName:
-        print(f'Bag of words do arquivo {fileName}: {getBagOfWords(vocabulary, getCleanTextFile(f"{folderPath}/{fileName}"))}')
 
 def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[str]) -> dict[str, int]:
+     """
+    Calcula a quantidade de ocorrências de determinado termo do vocabulário no documento contido em documentfolderPath
+    e retorna essa relação em um dicionário (chave:valor)
+    """
     documentTerms: list[str] = getCleanTextFile(documentfolderPath)
     documentProportion: dict = {}
 
@@ -137,6 +139,9 @@ def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[s
     return documentProportion
 
 def calculateAllDocumentsTermsProportion(filesFolderPath: str) -> list[dict[str, int]]:
+    """
+    Calcula proporção da ocorrência dos termos do vocabulário para com todos os documentos.
+    """
     tableTermsProportion: list[dict[str, int]] = []
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
@@ -147,8 +152,10 @@ def calculateAllDocumentsTermsProportion(filesFolderPath: str) -> list[dict[str,
     return tableTermsProportion
 
 def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], vocabulary: list[str]) -> dict[str, int]:
+    """
+    Calcula o TF de um documento específico contido, nos quais seus termos estão contidos em  documentTermsProportion
+    """
     documentTF: dict = {}
-    # print('====================document===========================')
     for term in vocabulary:
         termProportion: int = documentTermsProportion.get(term)
         tfPonderation: float = 0
@@ -161,12 +168,11 @@ def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], voca
         documentTF.update({term: tfPonderation})
     return documentTF
 
-def printTable(elements: list[any]) -> None:
-    for element in elements:
-        print(element)
-    print()
-
 def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, int]]:
+    """
+    Faz o cálculo do TF para com todos os documentos, sendo um calculado um documento por vez, através da 
+    função calculateDocumentTFPonderation.
+    """
     tableTFPonderation: list[dict[str, int]] = []
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
@@ -178,6 +184,9 @@ def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, i
     return tableTFPonderation
 
 def groupAllDocumentsTerms(filesFolderPath: str) -> list[list[str]]:
+    """
+    Calcula a quantidade de vezes que algum termo do vocabulário apareceu em todos os documentos
+    """
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
     groupedDocumentsTerms: list[list[str]] = []
     for fileName in filesName:
@@ -187,6 +196,9 @@ def groupAllDocumentsTerms(filesFolderPath: str) -> list[list[str]]:
     return groupedDocumentsTerms
 
 def initializeDictionary(keys: list[any]) -> dict[any, 0]:
+    """
+    Inicializa um dicionionário com as chaves contidos em keys com todos os valores zerados
+    """
     filledDictionary: dict[any, 0] = {}
 
     for key in keys:
@@ -195,10 +207,13 @@ def initializeDictionary(keys: list[any]) -> dict[any, 0]:
     return filledDictionary
 
 def getallDocumentsTermAppearences(filesFolderPath: str) -> dict[str, int]:
+    """
+    Calcula a quantidade de vezes que algum termo do vocabulário apareceu em todos os documentos
+    """
     allDocumentsTerms: list[list[str]] = groupAllDocumentsTerms(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
     allDocumentsTermAppearences: dict[str, int] = initializeDictionary(vocabulary)
-    # TODO - MELHORAR PERFORMANCE DESSA PARTE
+
     for term in vocabulary:
         for documentTerms in allDocumentsTerms:
             if term in documentTerms:
@@ -207,42 +222,28 @@ def getallDocumentsTermAppearences(filesFolderPath: str) -> dict[str, int]:
                 
     return allDocumentsTermAppearences
 
-def multiplyDictionaryValues(firstDict: dict[any, any], secondDict: dict[any, any]) -> dict[any, any]:
-    dictionaryResult: dict[any, any] = {}
-
-    if(len(firstDict) != len(secondDict)):
-        raise Exception("Não é possível realizar multiplicação!")
- 
-    for key in firstDict:
-        firstDictTermValue: any = firstDict.get(key) 
-        secondDictTermValue: any = secondDict.get(key)
-
-        dictionaryResult.update({key: round(firstDictTermValue * secondDictTermValue,3)})
-
-    return dictionaryResult
-
-def calculateTfIdfPonderation(TFTable: list[dict[str, int]] , IDFTable: dict[str, int]) -> list[dict[str, int]]:
-    result: list[dict[str, int]] = []
-
-    for TFDocument in TFTable:
-        result.append(multiplyDictionaryValues(TFDocument, IDFTable))
-
-    return result
-
 def transposeList(elements: list[list[any]]):
+    """
+    Recebe uma lista de lista qualquer e retorna a mesma transposta.
+    Será útil para faz a impressão dos dados na tela
+    """
     return  list(map(list, zip(*elements)))
 
 def modelateDictionaryToList(elements: list[dict[str, int]]) -> list[list[str]]:
+    """
+    Recebe uma lista de dicionário e transforma numa lista de listas com as chaves do dicionário.
+    """
     dictionaryKeys: list[any] = list(elements[0].keys())
     dictionaryValues: list[list[any]] = [dictionaryKeys]
     for element in elements:
         dictionaryValues.append(convertListToStringList(list(element.values())))
         
     return transposeList(dictionaryValues)
-    
-            
         
 def drawTable(tableBody: list[list[any]], Tableheader: list[str], TableTitle: str) -> None:
+    """
+    Imprime a tabela com o TF_IDF.
+    """  
     table = Table(title=TableTitle)
 
     for headerColumn in Tableheader:
@@ -256,6 +257,9 @@ def drawTable(tableBody: list[list[any]], Tableheader: list[str], TableTitle: st
 
 
 def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
+    """
+    Cálcula o IDF de todos os documentos.
+    """
     allDocumentsTermAppearences: dict[str, int] = getallDocumentsTermAppearences(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
@@ -269,9 +273,13 @@ def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
 
     return idfPondaration
 
-def generateTFIDFHeaderTable(folderPath: str) -> list[str]:
+
+def generateHeaderTable(headerList: list[str], folderPath: str) -> list[str]:
+    """
+    Desenha o header de uma tabela qualquer.
+    """
     documentsNames: list[str] = getAllFileNamesFromFolder(folderPath)
-    headerList: list[str] = ["Termo"]
+    headerList: list[str] = headerList
 
     for documentName in documentsNames:
         headerList.append(documentName)
@@ -281,20 +289,28 @@ def generateTFIDFHeaderTable(folderPath: str) -> list[str]:
 def convertListToStringList(elements: list[any]) -> list[str]:
     return [str(i) for i in elements]
 
-def printTfIdfTable(TfTable: list[dict[str, int]], IdfTable: list[dict[str, int]]) -> None:
-    TF_IDF_Table: list[dict[str, int]]= calculateTfIdfPonderation(TfTable, IdfTable)
+def printTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:  
+    """
+    Imprime a tabela com o TF_IDF.
+    """  
     bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
-    headerTable: list[str] = generateTFIDFHeaderTable('files')
+    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)
 
     drawTable(bodyTable, headerTable, "TF-IDF")
 
 def printTfTable(TfTable: list[dict[str, int]]) -> None:
+    """
+    Imprime a tabela com o TF.
+    """
     bodyTable: list[list[any]] = modelateDictionaryToList(TfTable)
-    headerTable: list[str] = generateTFIDFHeaderTable('files')
+    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)
 
     drawTable(bodyTable, headerTable, "TF")
 
 def printIdfTable(tfIdfTable: list[dict[str, int]]):
+    """
+    Imprime uma tabela com o IDF.
+    """
     bodyTable: list[list[any]] = modelateDictionaryToList(tfIdfTable)
     headerTable: list[str] = ["Termo", "IDFi = log(N/ni)"]
 

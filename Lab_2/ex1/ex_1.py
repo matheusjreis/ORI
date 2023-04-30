@@ -2,6 +2,8 @@ from unidecode import unidecode
 import string
 import os
 
+FILES_FOLDER_PATH = 'files'
+RESULT_FILE_NAME = 'result.txt'
 
 def readFile(fileName: str) -> list[str]:
     """
@@ -11,6 +13,9 @@ def readFile(fileName: str) -> list[str]:
         return file.readlines()
 
 def getMergedFilesContent(folderPath: str) -> list[str]:
+    """
+    Busca o contéudo de todos os documentos contidos no caminho folderPath concatenados.
+    """
     directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
     mergedTextContent: list[str] = []
 
@@ -20,6 +25,9 @@ def getMergedFilesContent(folderPath: str) -> list[str]:
     return removeElementFromList(mergedTextContent, '')
 
 def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
+    """
+    Busca e o vocabulário de todos os arquivos concatenados.
+    """
     directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
     mergedVocabulary: list[str] = []
 
@@ -117,17 +125,23 @@ def getBagOfWords(vocabulary: list[str], document: list[str]) -> list[int]:
     return bafOfWords
 
 def getAllFileNamesFromFolder(folderPath: str) -> list[str]:
+    """
+    Busca o nome de todos os arquivos contidos no diretório do caminho contido em folderPath
+    """
     return os.listdir(folderPath)
 
 def printDocumentBagOfWords(folderPath: str, vocabulary: list[str]) -> None:
+    """
+    Imprime a bag of wards do aqurivo contido em folderPath
+    """
     documentFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
 
     for fileName in documentFilesName:
         print(f'Bag of words do arquivo {fileName}: {getBagOfWords(vocabulary, getCleanTextFile(f"{folderPath}/{fileName}"))}')
 
 def main():
-    rootDirectoryPath: str = 'files'
-    resultsFileName: str = 'result.txt'
+    rootDirectoryPath: str = FILES_FOLDER_PATH
+    resultsFileName: str = RESULT_FILE_NAME
 
     vocabulary: list[str] = getMultipleFilesVocabulary(rootDirectoryPath)
 
