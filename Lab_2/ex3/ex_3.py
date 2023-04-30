@@ -6,6 +6,8 @@ import os
 import math
 import time
 
+FILES_FOLDER_PATH = 'files'
+
 def readFile(fileName: str) -> list[str]:
     """
     Recebe o nome de um arquivo e retorna uma lista com o conteúdo dele.
@@ -22,10 +24,10 @@ def getMergedFilesContent(folderPath: str) -> list[str]:
     
     return removeElementFromList(mergedTextContent, '')
 
-def printPonderationDetails(IDFTable: list[dict[str, int]], fileFolderPath: str) -> None:
+def printPonderationDetails(TF_IDFTable: list[dict[str, int]], fileFolderPath: str) -> None:
 
     print(f"Quantidade de termos: {len(getMultipleFilesVocabulary(fileFolderPath))}")
-    print(f"Termo(s) com maior frequência: {printMaxKeyList(IDFTable)}")
+    print(f"Termo(s) com maior frequência: {getMaxKeyList(TF_IDFTable)}")
 
 
 def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
@@ -69,7 +71,7 @@ def clearPunctuation(word: str) -> str:
     """
     word = word.replace('\n', ' ')
     word = word.lower()
-    word = word.translate(str.maketrans('', '', string.punctuation))
+    word = word.translate(str.maketrans('', '', string.punctuation.replace('-','')))
     word = unidecode(word)
     return word
 
@@ -155,7 +157,6 @@ def calculateAllDocumentsTermsProportion(filesFolderPath: str) -> list[dict[str,
 
 def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], vocabulary: list[str]) -> dict[str, int]:
     documentTF: dict = {}
-    # print('====================document===========================')
     for term in vocabulary:
         termProportion: int = documentTermsProportion.get(term)
         tfPonderation: float = 0
@@ -295,13 +296,13 @@ def convertListToStringList(elements: list[any]) -> list[str]:
 
 def printTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:    
     bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
-    headerTable: list[str] = generateTFIDFHeaderTable('files')
+    headerTable: list[str] = generateTFIDFHeaderTable(FILES_FOLDER_PATH)
 
     drawTable(bodyTable, headerTable, "TF-IDF")
 
 def printTfTable(TfTable: list[dict[str, int]]) -> None:
     bodyTable: list[list[any]] = modelateDictionaryToList(TfTable)
-    headerTable: list[str] = generateTFIDFHeaderTable('files')
+    headerTable: list[str] = generateTFIDFHeaderTable(FILES_FOLDER_PATH)
 
     drawTable(bodyTable, headerTable, "TF")
 
@@ -311,29 +312,56 @@ def printIdfTable(tfIdfTable: list[dict[str, int]]):
 
     drawTable(bodyTable, headerTable, "IDF")
 
-# TODO - MELHORAR FUNÇÃO
-def printMaxKeyList(listOfDicts: list[dict[any, any]]):
-    max_value: any = max(d[max(d, key=d.get)] for d in listOfDicts)
-    max_keys: list[any] = [k for d in listOfDicts for k, v in d.items() if v == max_value]
-    return max_keys
+def concatenateDictionaries(listOfDicts: list[dict[any, any]]) -> dict[any, any]:
+    concatenatedDictionary: dict[any, any] = {}
+
+    for dictionary in listOfDicts:        
+        concatenatedDictionary.update(dictionary)
+
+    return concatenatedDictionary
+
+def getDictionaryKeyByValue(dictionary: dict[any, any], searchValue: any) -> any:
+    dictionaryKey: any = 0
+
+    for dictKey, dictValue in dictionary.items():
+        if dictValue == searchValue:
+            dictionaryKey = dictKey
+
+    return dictionaryKey
 
 
+def getMaxKeyList(listOfDicts: list[dict[any, any]]) -> list[str]:
+    maxesKeysDict: list[any] = []
+    maxesValuesDict: list[int] = []
+    maxValue: any = 0
+
+    for dictionary in listOfDicts:
+        maxesValuesDict.append(max(dictionary.values()))
+
+    maxValue = max(maxesValuesDict)
+
+    for dictionary in listOfDicts:
+        maxValueKey: any = getDictionaryKeyByValue(dictionary, maxValue)
+        if maxValueKey != 0:
+            maxesKeysDict.append(maxValueKey)
+
+    return maxesKeysDict
 
 def main(): 
     vocabulary_start_time: float = time.time()
 
-    vocabulary: list[str] = getMultipleFilesVocabulary('files')
+    vocabulary: list[str] = getMultipleFilesVocabulary(FILES_FOLDER_PATH)
 
     vocabulary_end_time: float = time.time()
 
     start_time: float = time.time()
 
-    TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
-    IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')
+    TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation(FILES_FOLDER_PATH)
+    IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)
     TF_IDF_Table: list[dict[str, int]]= calculateTfIdfPonderation(TfTable, IDFTable)
 
     printTfIdfTable(TF_IDF_Table)
-    printPonderationDetails(TF_IDF_Table, 'files')
+    printPonderationDetails(TF_IDF_Table, FILES_FOLDER_PATH)
 
     end_time: float = time.time()
 
