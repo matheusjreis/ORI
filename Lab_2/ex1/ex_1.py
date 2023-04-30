@@ -38,7 +38,6 @@ def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
     resultList.sort()
     return removeElementFromList(resultList, '')
 
-
 def removeElementFromList(listElements: list[any], element: any) -> list[any]:
     """
     Função auxiliar que recebe uma lista de elementos e um outro elemento qualquer e retorna
@@ -60,7 +59,6 @@ def getStripedFileWords(fileContent: list[str]) -> list[str]:
         mergedContent += line
     return clearPunctuation(mergedContent).split(' ')
 
-
 def clearPunctuation(word: str) -> str:
     """
     Recebe uma string com qualquer texto em questão e retorna esse mesmo texto sem nenhuma 
@@ -68,10 +66,9 @@ def clearPunctuation(word: str) -> str:
     """
     word = word.replace('\n', ' ')
     word = word.lower()
-    word = word.translate(str.maketrans('', '', string.punctuation))
+    word = word.translate(str.maketrans('', '', string.punctuation.replace('-','')))
     word = unidecode(word)
     return word
-
 
 def getVocabulary(fileName: str) -> list[str]:
     """

@@ -5,6 +5,8 @@ import string
 import os
 import math
 
+FILES_FOLDER_PATH = 'files'
+
 def readFile(fileName: str) -> list[str]:
     """
     Recebe o nome de um arquivo e retorna uma lista com o conteúdo dele.
@@ -54,7 +56,6 @@ def getStripedFileWords(fileContent: list[str]) -> list[str]:
         mergedContent += line
     return clearPunctuation(mergedContent).split(' ')
 
-
 def clearPunctuation(word: str) -> str:
     """
     Recebe uma string com qualquer texto em questão e retorna esse mesmo texto sem nenhuma 
@@ -62,10 +63,9 @@ def clearPunctuation(word: str) -> str:
     """
     word = word.replace('\n', ' ')
     word = word.lower()
-    word = word.translate(str.maketrans('', '', string.punctuation))
+    word = word.translate(str.maketrans('', '', string.punctuation.replace('-','')))
     word = unidecode(word)
     return word
-
 
 def getVocabulary(fileName: str) -> list[str]:
     """
@@ -123,7 +123,6 @@ def getAllFileNamesFromFolder(folderPath: str) -> list[str]:
     Busca o nome de todos os arquivos contidos no diretório do caminho contido em folderPath
     """
     return os.listdir(folderPath)
-
 
 def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[str]) -> dict[str, int]:
      """
@@ -255,7 +254,6 @@ def drawTable(tableBody: list[list[any]], Tableheader: list[str], TableTitle: st
     console = Console()
     console.print(table)
 
-
 def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
     """
     Cálcula o IDF de todos os documentos.
@@ -272,7 +270,6 @@ def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
             idfPondaration.update({term: round(math.log((documentsQuantity/termValue), 2), 3)})
 
     return idfPondaration
-
 
 def generateHeaderTable(headerList: list[str], folderPath: str) -> list[str]:
     """
@@ -318,13 +315,12 @@ def printIdfTable(tfIdfTable: list[dict[str, int]]):
 
 def main():
     
-    TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation('files')
-    IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation('files')    
+    TfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation(FILES_FOLDER_PATH)
+    IDFTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)    
 
     printTfTable(TfTable)
     printIdfTable([IDFTable])
     printTfIdfTable(TfTable, IDFTable)
-    
 
 if __name__ == "__main__":
     main()
