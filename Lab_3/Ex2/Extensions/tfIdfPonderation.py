@@ -1,7 +1,8 @@
+from Extensions import file
+from Extensions import objectExtension
 from unidecode import unidecode
 from rich.console import Console
 from rich.table import Table
-from Extensions.File import *
 import string
 import os
 import math
@@ -16,7 +17,7 @@ def getMergedFilesContent(folderPath: str) -> list[str]:
     for fileName in directoryFilesName:
         mergedTextContent += getCleanTextFile(f"{folderPath}/{fileName}")
     
-    return removeElementFromList(mergedTextContent, '')
+    return objectExtension.removeElementFromList(mergedTextContent, '')
 
 def printPonderationDetails(TF_IDFTable: list[dict[str, int]], fileFolderPath: str) -> None:
 
@@ -32,20 +33,9 @@ def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
     
     resultList: list[str] = list(set(mergedVocabulary))
     resultList.sort()
-    return removeElementFromList(resultList, '')
+    return objectExtension.removeElementFromList(resultList, '')
 
-def removeElementFromList(listElements: list[any], element: any) -> list[any]:
-    """
-    Função auxiliar que recebe uma lista de elementos e um outro elemento qualquer e retorna
-    essa mesma lista sem esse elemento.
-    """
-    result: list[any] = []
-    for item in listElements:
-        if item != element:
-            result.append(item)
-    return result
-
-def getStripedFileWords(fileContent: list[str]) -> list[str]:
+def getStripedWords(fileContent: list[str]) -> list[str]:
     """
     Recebe uma lista com um elemento, sendo a lista o conteúdo do arquivo e retorna outra 
     lista com cada palavra (que esteja separada por um espaço) em uma posição.
@@ -53,7 +43,9 @@ def getStripedFileWords(fileContent: list[str]) -> list[str]:
     mergedContent: str = ""
     for line in fileContent:
         mergedContent += line
-    return clearPunctuation(mergedContent).split(' ')
+    
+    clearedText: list[str] = clearPunctuation(mergedContent).split(' ')
+    return clearedText
 
 def clearPunctuation(word: str) -> str:
     """
@@ -72,21 +64,19 @@ def getVocabulary(fileName: str) -> list[str]:
     de string), estrutura esse conteúdo num array, remove os elementos repetidos e retorna esse
     mesmo array ordenado.
     """
-    fileContent: list[str] = readFile(fileName)
-    stripedFileContent: list[str] = getStripedFileWords(fileContent)
+    fileContent: list[str] = file.readFile(fileName)
+    stripedFileContent: list[str] = getStripedWords(fileContent)
     unrepeteadedText: list[str] = list(set(stripedFileContent))
 
     return unrepeteadedText
-
-
 
 def getCleanTextFile(fileName: str) -> list[str]:
     """
     Recebe o nome de um arquivo, faz sua leitura e retorna o conteúdo dele sem pontuação
     e com as palavras separadas dentro de uma lista.    
     """
-    fileContent: list[str] = readFile(fileName)
-    stripedFileContent: list[str] = getStripedFileWords(fileContent)
+    fileContent: list[str] = file.readFile(fileName)
+    stripedFileContent: list[str] = getStripedWords(fileContent)
     return stripedFileContent
 
 def getBagOfWords(vocabulary: list[str], document: list[str]) -> list[int]:
@@ -111,7 +101,6 @@ def getAllFileNamesFromFolder(folderPath: str) -> list[str]:
     Busca o nome de todos os arquivos contidos no diretório do caminho contido em folderPath
     """
     return os.listdir(folderPath)
-
 
 def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[str]) -> dict[str, int]:
     """
@@ -139,7 +128,7 @@ def calculateAllDocumentsTermsProportion(filesFolderPath: str) -> list[dict[str,
     
     return tableTermsProportion
 
-def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], vocabulary: list[str]) -> dict[str, int]:
+def calculateTFPonderation(documentTermsProportion: dict[str, int], vocabulary: list[str]) -> dict[str, int]:
     """
     Calcula o TF de um documento específico contido, nos quais seus termos estão contidos em  documentTermsProportion
     """
@@ -159,7 +148,7 @@ def calculateDocumentTFPonderation(documentTermsProportion: dict[str, int], voca
 def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, int]]:
     """
     Faz o cálculo do TF para com todos os documentos, sendo um calculado um documento por vez, através da 
-    função calculateDocumentTFPonderation.
+    função calculateTFPonderation.
     """
     tableTFPonderation: list[dict[str, int]] = []
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
@@ -167,7 +156,7 @@ def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, i
 
     for fileName in filesName:
         fileTermProportion: dict[str, int] = calculateDocumentTermsProportion(f'{filesFolderPath}/{fileName}', vocabulary)
-        tableTFPonderation.append(calculateDocumentTFPonderation(fileTermProportion, vocabulary))
+        tableTFPonderation.append(calculateTFPonderation(fileTermProportion, vocabulary))
     
     return tableTFPonderation
 
@@ -215,6 +204,7 @@ def multiplyDictionaryValues(firstDict: dict[any, any], secondDict: dict[any, an
     Realiza a multiplicação da chaves de dois dicionários e retorna um dicionário único com esses valores
     calculados.
     """
+
     dictionaryResult: dict[any, any] = {}
 
     if(len(firstDict) != len(secondDict)):
@@ -403,10 +393,3 @@ def showVocabularyStatistics() -> None:
     executionTimeVocabulary: float = vocabularyEndTime - vocabularyStartTime
 
     print("Tempo de execução (Vocabulário):", round(executionTimeVocabulary, 5), "segundos")
-
-def main(): 
-    showTFIDFStatistics()
-    showVocabularyStatistics()
-    
-if __name__ == "__main__":
-    main()
