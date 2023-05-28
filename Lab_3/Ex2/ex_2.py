@@ -5,16 +5,7 @@ import math
 FILES_FOLDER_PATH = 'files'
 
 def getQueryTfPonderation(query: str) -> list[dict[str, int]]:
-    tableTFPonderation: list[dict[str, int]] = []
-
-    queryVocabulary: list[str] = getQueryVocabulary(query)
-    filesName: list[str] = tfIdfExtension.getAllFileNamesFromFolder(FILES_FOLDER_PATH)
-
-    for fileName in filesName:
-        fileTermProportion: dict[str, int] = tfIdfExtension.calculateDocumentTermsProportion(f'{FILES_FOLDER_PATH}/{fileName}', queryVocabulary)
-        tableTFPonderation.append(tfIdfExtension.calculateTFPonderation(fileTermProportion, queryVocabulary))
-
-    return tableTFPonderation
+    return [getQueryTermAppearences(query)]
 
 def calculateAllDocumentsQueryIDFponderation(filesFolderPath: str, vocabulary: list[str]) -> dict[str, int]:
     """
@@ -53,16 +44,13 @@ def getQueryIDFponderation(query: str) -> dict[str, int]:
     Cálcula o IDF de todos os documentos.
     """
 
-    allQueryTermAppearences: dict[str, int] = getQueryTermAppearences(query)
     vocabulary: list[str] = getQueryVocabulary(query)
+    documetsIdf: dict[str, int] = tfIdfExtension.calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)
     idfPondaration: dict[str, int] = tfIdfExtension.initializeDictionary(vocabulary)
 
-    print(allQueryTermAppearences, vocabulary)
-
     for term in vocabulary:
-        termValue: int = allQueryTermAppearences.get(term)
-        if termValue > 0:
-            idfPondaration.update({term: round(math.log((1/termValue), 2), 3)})
+        termValue: int = documetsIdf.get(term)
+        idfPondaration.update({term: termValue})
 
     return idfPondaration
 
@@ -97,12 +85,26 @@ def getQueryVocabulary(query: str) -> list[str]:
 def getQueryTerms(query: str) -> list[str]:
     return tfIdfExtension.getStripedWords(query.split(' '))
 
+
+def printQueryTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:  
+    """
+    Imprime a tabela com o TF_IDF.
+    """  
+    bodyTable: list[list[any]] = tfIdfExtension.modelateDictionaryToList(TF_IDF_Table)
+    headerTable: list[str] = ["Termo","Consulta"]
+
+    tfIdfExtension.drawTable(bodyTable, headerTable, "TF-IDF") 
+
+
 def main():
     # query: str = input("Digite uma consulta qualquer: ")
     query: str = 'to do'
 
     tfIdfTable = getQueryTfIdfPonderation(query)
-    tfIdfExtension.printTfIdfTable(tfIdfTable)
+
+    print(tfIdfTable)
+
+    printQueryTfIdfTable(tfIdfTable)
 
 if __name__ == "__main__":
     main()
