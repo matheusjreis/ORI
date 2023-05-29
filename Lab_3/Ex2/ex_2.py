@@ -61,6 +61,20 @@ def getQueryTfIdfPonderation(query: str) -> list[dict[str, int]]:
 
     return tfIdfExtension.calculateTfIdfPonderation(tfTable, idfTable) 
 
+def getDocumentTfIdfPonderation() -> list[dict[str, int]]:
+    tfTable: list[dict[str, int]] = tfIdfExtension.calculateAllDocumentsTfPonderation(FILES_FOLDER_PATH)
+    idfTable: list[dict[str, int]] = tfIdfExtension.calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)  
+
+    return tfIdfExtension.calculateTfIdfPonderation(tfTable, idfTable)
+
+def convertStringListToFloatList(stringList: list[str]) -> list[float]:
+    floatList: list[float] = []
+    for item in stringList:
+        floatList.append(float(item))
+    
+    return floatList
+
+
 def getQueryTermsProportion(query: str) -> dict[str, int]:
     """
     Calcula a quantidade de ocorrências de determinado termo do vocabulário no documento contido em documentfolderPath
@@ -95,16 +109,83 @@ def printQueryTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:
 
     tfIdfExtension.drawTable(bodyTable, headerTable, "TF-IDF") 
 
+def calculateVectorProduct(firstVector: list[float], secondVector: list[float]) -> float:
+    result: float = 0.0
+    
+    if(len(firstVector) != len(secondVector)):
+        raise Exception("Não é possível o cálculo do produto interno do vetor!")
+    
+    for i in range(len(firstVector)):
+        result += firstVector[i] * secondVector[i]
+
+    return result
+
+def calculateVectorNorm(vector: list[float]) -> float:
+    result: float = 0
+
+    for value in vector:
+        result += value**2
+    
+    print('result', result)
+    return math.sqrt(result)
+
+def getQueryDocumentSimilarity(queryVector: list[float], documentVector: list[float]) -> float:
+    return calculateVectorProduct(queryVector, documentVector)/calculateVectorNormProduct(queryVector, documentVector)
+
+
+def calculateVectorNormProduct(firstVector: list[float], secondVector: list[float]) -> float:
+    result: float = calculateVectorNorm(firstVector) * calculateVectorNorm(secondVector)
+    if result == 0:
+        return 1
+
+    return result
+
+def getFilteredTfIdfByTerms(terms: list[str], tfIdfTable: list[dict[str, int]]) -> list[dict[str, int]]:
+    result = {}
+
+    for document in tfIdfTable:
+        for prop in terms:
+            if prop in tfIdfTable:
+                result[prop] = document[prop]
+
+    return result
+
+def getQueryVector(tfIdfTableQuery: list[dict[str, int]]) -> list[float]:
+    modelatedQuery = tfIdfExtension.modelateDictionaryToList(tfIdfTableQuery)
+    return tfIdfExtension.transposeList(modelatedQuery)[1]
+
+def getQuerySimilarityByDocument(tfIdfDocument: list[dict[str, float]], query: str) -> dict[str, float]:
+    queryVocabulary = getQueryVocabulary(query)
+
+
+    tfIdfTableQuery = getQueryTfIdfPonderation(query)
+    queryVector = getQueryVector(tfIdfTableQuery)
+    filteredDocumentData = getFilteredTfIdfByTerms(getQueryVocabulary(query), tfIdfDocument)
+    documentVectors = tfIdfExtension.getRelationshipDocumentTfIdf(filteredDocumentData)
+    documentsSimilarities = {}
+
+
+
+    for document, documentVector in documentVectors.items():
+        convertedQueryVector = convertStringListToFloatList(queryVector)
+        convertedDocumentVector =  convertStringListToFloatList(documentVector)
+        documentsSimilarities.update({document: getQueryDocumentSimilarity(convertedQueryVector, convertedDocumentVector)})
+
+    return documentsSimilarities
+
 
 def main():
-    # query: str = input("Digite uma consulta qualquer: ")
-    query: str = 'to do'
+    query: str = input("Digite uma consulta qualquer: ")
+    # query: str = 'to do be'
 
-    tfIdfTable = getQueryTfIdfPonderation(query)
+    tfIdfDocument = getDocumentTfIdfPonderation()
+    print(getQuerySimilarityByDocument(tfIdfDocument, query))
+    
 
-    print(tfIdfTable)
+    # print(calculateVectorProduct([1, 0.415], [3, 0.830]))
+    # print(calculateVectorNormProduct([1, 0.415], [3, 0.830]))
 
-    printQueryTfIdfTable(tfIdfTable)
+    # print(getQueryDocumentSimilarity([1, 0.415], [3, 0.830]))
 
 if __name__ == "__main__":
     main()
