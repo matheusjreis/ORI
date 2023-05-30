@@ -248,7 +248,7 @@ def modelateDictionaryToList(elements: list[dict[str, int]]) -> list[list[str]]:
     """
     if elements == {}:
         print('vazio')
-        return [[]]
+        return []
 
     dictionaryKeys: list[any] = list(elements[0].keys())
     dictionaryValues: list[list[any]] = [dictionaryKeys]
@@ -326,21 +326,16 @@ def printTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:
     drawTable(bodyTable, headerTable, "TF-IDF")
 
 def getRelationshipDocumentTfIdf(TF_IDF_Table: list[dict[str, int]]) -> dict[str, list[any]]:
-    # documentMatrix = getTfIdfUnifedMatrix(TF_IDF_Table)
-
     structuredTfIdf: dict[str, list[any]] = {}
     headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)[1:]
-    bodyTable: list[list[any]] = transposeList(modelateDictionaryToList(TF_IDF_Table))[1:]
+    model = modelateDictionaryToList(TF_IDF_Table)
+    bodyTable: list[list[any]] = transposeList(model)[1:]
 
     for i, title in enumerate(headerTable):
-        structuredTfIdf.update({title: bodyTable[i]})
-
+        if len(bodyTable) > 0:
+            structuredTfIdf.update({title: bodyTable[i]})
+                        
     return structuredTfIdf
-    
-
-
-
-
 
 
 def getTfIdfUnifedMatrix(TF_IDF_Table: list[dict[str, int]]) -> list[list[any]]:  
@@ -403,32 +398,3 @@ def getMaxKeyList(listOfDicts: list[dict[any, any]]) -> list[str]:
             maxesKeysDict.append(maxValueKey)
 
     return maxesKeysDict
-
-def showTFIDFStatistics() -> None:
-    """
-    Imprime todos os dados referentes ao TF_IDF. Assim como o tempo gasto na sua execução.
-    """
-    startTime: float = time.time()
-
-    tfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation(FILES_FOLDER_PATH)
-    idfTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)
-    tfIdfTable: list[dict[str, int]]= calculateTfIdfPonderation(tfTable, idfTable)
-
-    printTfIdfTable(tfIdfTable)
-    printPonderationDetails(tfIdfTable, FILES_FOLDER_PATH)
-
-    endTime: float = time.time()
-    executiontime: float = endTime - startTime 
-    print("Tempo de execução (TF-IDF):", round(executiontime, 2), "segundos")
-
-def showVocabularyStatistics() -> None:
-    """
-    Imprime o tempo gasto na execução da geração do vocabulário.
-    """
-    vocabularyStartTime: float = time.time()
-    vocabulary: list[str] = getMultipleFilesVocabulary(FILES_FOLDER_PATH)
-    vocabularyEndTime: float = time.time()
-
-    executionTimeVocabulary: float = vocabularyEndTime - vocabularyStartTime
-
-    print("Tempo de execução (Vocabulário):", round(executionTimeVocabulary, 5), "segundos")

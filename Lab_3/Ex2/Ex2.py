@@ -99,6 +99,12 @@ def getQueryVocabulary(query: str) -> list[str]:
 def getQueryTerms(query: str) -> list[str]:
     return tfIdfExtension.getStripedWords(query.split(' '))
 
+def printSimilarityTable(similarityTable: dict) -> None:
+    bodyTable: list[list[any]] = tfIdfExtension.modelateDictionaryToList([similarityTable])
+    headerTable: list[str] = ["Documento","Similaridade"]
+
+    tfIdfExtension.drawTable(bodyTable, headerTable, "MODELO VETORIAL")
+
 
 def printQueryTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:  
     """
@@ -107,7 +113,7 @@ def printQueryTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:
     bodyTable: list[list[any]] = tfIdfExtension.modelateDictionaryToList(TF_IDF_Table)
     headerTable: list[str] = ["Termo","Consulta"]
 
-    tfIdfExtension.drawTable(bodyTable, headerTable, "TF-IDF") 
+    tfIdfExtension.drawTable(bodyTable, headerTable, "TF-IDF")
 
 def calculateVectorProduct(firstVector: list[float], secondVector: list[float]) -> float:
     result: float = 0.0
@@ -126,7 +132,6 @@ def calculateVectorNorm(vector: list[float]) -> float:
     for value in vector:
         result += value**2
     
-    print('result', result)
     return math.sqrt(result)
 
 def getQueryDocumentSimilarity(queryVector: list[float], documentVector: list[float]) -> float:
@@ -142,29 +147,28 @@ def calculateVectorNormProduct(firstVector: list[float], secondVector: list[floa
 
 def getFilteredTfIdfByTerms(terms: list[str], tfIdfTable: list[dict[str, int]]) -> list[dict[str, int]]:
     result = {}
+    resultList = []
 
     for document in tfIdfTable:
         for prop in terms:
-            if prop in tfIdfTable:
+            if prop in document:
                 result[prop] = document[prop]
-
-    return result
+            else:
+                result.update({prop: 0})
+        resultList.append(result)
+        result = {}
+    return resultList
 
 def getQueryVector(tfIdfTableQuery: list[dict[str, int]]) -> list[float]:
     modelatedQuery = tfIdfExtension.modelateDictionaryToList(tfIdfTableQuery)
     return tfIdfExtension.transposeList(modelatedQuery)[1]
 
 def getQuerySimilarityByDocument(tfIdfDocument: list[dict[str, float]], query: str) -> dict[str, float]:
-    queryVocabulary = getQueryVocabulary(query)
-
-
     tfIdfTableQuery = getQueryTfIdfPonderation(query)
     queryVector = getQueryVector(tfIdfTableQuery)
     filteredDocumentData = getFilteredTfIdfByTerms(getQueryVocabulary(query), tfIdfDocument)
     documentVectors = tfIdfExtension.getRelationshipDocumentTfIdf(filteredDocumentData)
     documentsSimilarities = {}
-
-
 
     for document, documentVector in documentVectors.items():
         convertedQueryVector = convertStringListToFloatList(queryVector)
@@ -176,16 +180,10 @@ def getQuerySimilarityByDocument(tfIdfDocument: list[dict[str, float]], query: s
 
 def main():
     query: str = input("Digite uma consulta qualquer: ")
-    # query: str = 'to do be'
-
     tfIdfDocument = getDocumentTfIdfPonderation()
-    print(getQuerySimilarityByDocument(tfIdfDocument, query))
+    similarity = getQuerySimilarityByDocument(tfIdfDocument, query)
     
-
-    # print(calculateVectorProduct([1, 0.415], [3, 0.830]))
-    # print(calculateVectorNormProduct([1, 0.415], [3, 0.830]))
-
-    # print(getQueryDocumentSimilarity([1, 0.415], [3, 0.830]))
+    printSimilarityTable(similarity)
 
 if __name__ == "__main__":
     main()
