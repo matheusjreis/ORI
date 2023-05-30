@@ -1,8 +1,10 @@
 from Extensions import tfIdfPonderation as tfIdfExtension
-import Constants
-import math
+from Extensions import constants
+from Extensions import vector
+from Extensions import objectExtension
+from Extensions import tableView
 
-FILES_FOLDER_PATH = 'files'
+import math
 
 def getQueryTfPonderation(query: str) -> list[dict[str, int]]:
     return [getQueryTermAppearences(query)]
@@ -14,7 +16,7 @@ def calculateAllDocumentsQueryIDFponderation(filesFolderPath: str, vocabulary: l
     allDocumentsTermAppearences: dict[str, int] = tfIdfExtension.getallDocumentsTermAppearences(filesFolderPath)
     filesName: list[str] = tfIdfExtension.getAllFileNamesFromFolder(filesFolderPath)
     documentsQuantity: int = len(filesName)
-    idfPondaration: dict[str, int] = tfIdfExtension.initializeDictionary(vocabulary)
+    idfPondaration: dict[str, int] = objectExtension.initializeDictionary(vocabulary)
 
     for term in vocabulary:
         termValue: int = allDocumentsTermAppearences.get(term)
@@ -29,7 +31,7 @@ def getQueryTermAppearences(query: str) -> dict[str, int]:
     """
     queryTerms: list[list[str]] = getQueryTerms(query)
     vocabulary: list[str] = getQueryVocabulary(query)
-    queryTermsAppearence: dict[str, int] = tfIdfExtension.initializeDictionary(vocabulary)
+    queryTermsAppearence: dict[str, int] = objectExtension.initializeDictionary(vocabulary)
 
     for term in vocabulary:
         for documentTerms in queryTerms:
@@ -45,8 +47,8 @@ def getQueryIDFponderation(query: str) -> dict[str, int]:
     """
 
     vocabulary: list[str] = getQueryVocabulary(query)
-    documetsIdf: dict[str, int] = tfIdfExtension.calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)
-    idfPondaration: dict[str, int] = tfIdfExtension.initializeDictionary(vocabulary)
+    documetsIdf: dict[str, int] = tfIdfExtension.calculateAllDocumentsIDFponderation(constants.FILES_FOLDER_PATH)
+    idfPondaration: dict[str, int] = objectExtension.initializeDictionary(vocabulary)
 
     for term in vocabulary:
         termValue: int = documetsIdf.get(term)
@@ -62,17 +64,10 @@ def getQueryTfIdfPonderation(query: str) -> list[dict[str, int]]:
     return tfIdfExtension.calculateTfIdfPonderation(tfTable, idfTable) 
 
 def getDocumentTfIdfPonderation() -> list[dict[str, int]]:
-    tfTable: list[dict[str, int]] = tfIdfExtension.calculateAllDocumentsTfPonderation(FILES_FOLDER_PATH)
-    idfTable: list[dict[str, int]] = tfIdfExtension.calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)  
+    tfTable: list[dict[str, int]] = tfIdfExtension.calculateAllDocumentsTfPonderation(constants.FILES_FOLDER_PATH)
+    idfTable: list[dict[str, int]] = tfIdfExtension.calculateAllDocumentsIDFponderation(constants.FILES_FOLDER_PATH)  
 
     return tfIdfExtension.calculateTfIdfPonderation(tfTable, idfTable)
-
-def convertStringListToFloatList(stringList: list[str]) -> list[float]:
-    floatList: list[float] = []
-    for item in stringList:
-        floatList.append(float(item))
-    
-    return floatList
 
 
 def getQueryTermsProportion(query: str) -> dict[str, int]:
@@ -91,59 +86,32 @@ def getQueryTermsProportion(query: str) -> dict[str, int]:
     return queryProportion
 
 def getQueryVocabulary(query: str) -> list[str]:
-    cleanText: list[str] = tfIdfExtension.clearPunctuation(query).split(' ')
+    cleanText: list[str] = objectExtension.clearPunctuation(query).split(' ')
     unrepeteadedText: list[str] = list(set(cleanText))
 
     return unrepeteadedText
     
 def getQueryTerms(query: str) -> list[str]:
-    return tfIdfExtension.getStripedWords(query.split(' '))
+    return  objectExtension.getStripedWords(query.split(' '))
 
-def printSimilarityTable(similarityTable: dict) -> None:
-    bodyTable: list[list[any]] = tfIdfExtension.modelateDictionaryToList([similarityTable])
+def printSimilarityTable(similarityTable: dict, query: str) -> None:
+    bodyTable: list[list[any]] = objectExtension.modelateDictionaryToList([similarityTable])
     headerTable: list[str] = ["Documento","Similaridade"]
 
-    tfIdfExtension.drawTable(bodyTable, headerTable, "MODELO VETORIAL")
-
+    tableView.drawTable(bodyTable, headerTable, f"MODELO VETORIAL - '{query}'")
 
 def printQueryTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:  
     """
     Imprime a tabela com o TF_IDF.
     """  
-    bodyTable: list[list[any]] = tfIdfExtension.modelateDictionaryToList(TF_IDF_Table)
+    bodyTable: list[list[any]] = objectExtension.modelateDictionaryToList(TF_IDF_Table)
     headerTable: list[str] = ["Termo","Consulta"]
 
-    tfIdfExtension.drawTable(bodyTable, headerTable, "TF-IDF")
-
-def calculateVectorProduct(firstVector: list[float], secondVector: list[float]) -> float:
-    result: float = 0.0
-    
-    if(len(firstVector) != len(secondVector)):
-        raise Exception("Não é possível o cálculo do produto interno do vetor!")
-    
-    for i in range(len(firstVector)):
-        result += firstVector[i] * secondVector[i]
-
-    return result
-
-def calculateVectorNorm(vector: list[float]) -> float:
-    result: float = 0
-
-    for value in vector:
-        result += value**2
-    
-    return math.sqrt(result)
+    tableView.drawTable(bodyTable, headerTable, "TF-IDF")
 
 def getQueryDocumentSimilarity(queryVector: list[float], documentVector: list[float]) -> float:
-    return calculateVectorProduct(queryVector, documentVector)/calculateVectorNormProduct(queryVector, documentVector)
+    return vector.calculateVectorProduct(queryVector, documentVector)/vector.calculateVectorNormProduct(queryVector, documentVector)
 
-
-def calculateVectorNormProduct(firstVector: list[float], secondVector: list[float]) -> float:
-    result: float = calculateVectorNorm(firstVector) * calculateVectorNorm(secondVector)
-    if result == 0:
-        return 1
-
-    return result
 
 def getFilteredTfIdfByTerms(terms: list[str], tfIdfTable: list[dict[str, int]]) -> list[dict[str, int]]:
     result = {}
@@ -160,8 +128,8 @@ def getFilteredTfIdfByTerms(terms: list[str], tfIdfTable: list[dict[str, int]]) 
     return resultList
 
 def getQueryVector(tfIdfTableQuery: list[dict[str, int]]) -> list[float]:
-    modelatedQuery = tfIdfExtension.modelateDictionaryToList(tfIdfTableQuery)
-    return tfIdfExtension.transposeList(modelatedQuery)[1]
+    modelatedQuery = objectExtension.modelateDictionaryToList(tfIdfTableQuery)
+    return objectExtension.transposeList(modelatedQuery)[1]
 
 def getQuerySimilarityByDocument(tfIdfDocument: list[dict[str, float]], query: str) -> dict[str, float]:
     tfIdfTableQuery = getQueryTfIdfPonderation(query)
@@ -171,19 +139,18 @@ def getQuerySimilarityByDocument(tfIdfDocument: list[dict[str, float]], query: s
     documentsSimilarities = {}
 
     for document, documentVector in documentVectors.items():
-        convertedQueryVector = convertStringListToFloatList(queryVector)
-        convertedDocumentVector =  convertStringListToFloatList(documentVector)
+        convertedQueryVector = objectExtension.convertStringListToFloatList(queryVector)
+        convertedDocumentVector =  objectExtension.convertStringListToFloatList(documentVector)
         documentsSimilarities.update({document: getQueryDocumentSimilarity(convertedQueryVector, convertedDocumentVector)})
 
     return documentsSimilarities
-
 
 def main():
     query: str = input("Digite uma consulta qualquer: ")
     tfIdfDocument = getDocumentTfIdfPonderation()
     similarity = getQuerySimilarityByDocument(tfIdfDocument, query)
     
-    printSimilarityTable(similarity)
+    printSimilarityTable(similarity, query)
 
 if __name__ == "__main__":
     main()

@@ -1,28 +1,23 @@
 from Extensions import file
 from Extensions import objectExtension
-from unidecode import unidecode
-from rich.console import Console
-from rich.table import Table
-import string
+from Extensions import constants
+from Extensions import tableView
 import os
 import math
-import time
-
-FILES_FOLDER_PATH = 'files'
 
 def getMergedFilesContent(folderPath: str) -> list[str]:
     directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
     mergedTextContent: list[str] = []
 
     for fileName in directoryFilesName:
-        mergedTextContent += getCleanTextFile(f"{folderPath}/{fileName}")
+        mergedTextContent += objectExtension.getCleanTextFile(f"{folderPath}/{fileName}")
     
     return objectExtension.removeElementFromList(mergedTextContent, '')
 
 def printPonderationDetails(TF_IDFTable: list[dict[str, int]], fileFolderPath: str) -> None:
 
     print(f"Quantidade de termos: {len(getMultipleFilesVocabulary(fileFolderPath))}")
-    print(f"Termo(s) com maior frequência: {getMaxKeyList(TF_IDFTable)}")
+    print(f"Termo(s) com maior frequência: {objectExtension.getMaxKeyList(TF_IDFTable)}")
 
 def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
     directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
@@ -35,29 +30,6 @@ def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
     resultList.sort()
     return objectExtension.removeElementFromList(resultList, '')
 
-def getStripedWords(fileContent: list[str]) -> list[str]:
-    """
-    Recebe uma lista com um elemento, sendo a lista o conteúdo do arquivo e retorna outra 
-    lista com cada palavra (que esteja separada por um espaço) em uma posição.
-    """
-    mergedContent: str = ""
-    for line in fileContent:
-        mergedContent += line
-    
-    clearedText: list[str] = clearPunctuation(mergedContent).split(' ')
-    return clearedText
-
-def clearPunctuation(word: str) -> str:
-    """
-    Recebe uma string com qualquer texto em questão e retorna esse mesmo texto sem nenhuma 
-    pontuação, formatação ou quebra de linha.
-    """
-    word = word.replace('\n', ' ')
-    word = word.lower()
-    word = word.translate(str.maketrans('', '', string.punctuation.replace('-','')))
-    word = unidecode(word)
-    return word
-
 def getVocabulary(fileName: str) -> list[str]:
     """
     Recebe o nome um arquivo em questão, faz a sua leitura (realizando os devidos tratamentos
@@ -65,19 +37,10 @@ def getVocabulary(fileName: str) -> list[str]:
     mesmo array ordenado.
     """
     fileContent: list[str] = file.readFile(fileName)
-    stripedFileContent: list[str] = getStripedWords(fileContent)
+    stripedFileContent: list[str] = objectExtension.getStripedWords(fileContent)
     unrepeteadedText: list[str] = list(set(stripedFileContent))
 
     return unrepeteadedText
-
-def getCleanTextFile(fileName: str) -> list[str]:
-    """
-    Recebe o nome de um arquivo, faz sua leitura e retorna o conteúdo dele sem pontuação
-    e com as palavras separadas dentro de uma lista.    
-    """
-    fileContent: list[str] = file.readFile(fileName)
-    stripedFileContent: list[str] = getStripedWords(fileContent)
-    return stripedFileContent
 
 def getBagOfWords(vocabulary: list[str], document: list[str]) -> list[int]:
     """
@@ -107,7 +70,7 @@ def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[s
     Calcula a quantidade de ocorrências de determinado termo do vocabulário no documento contido em documentfolderPath
     e retorna essa relação em um dicionário (chave:valor)
     """
-    documentTerms: list[str] = getCleanTextFile(documentfolderPath)
+    documentTerms: list[str] = objectExtension.getCleanTextFile(documentfolderPath)
     documentProportion: dict = {}
 
     for term in vocabulary:                             
@@ -166,21 +129,10 @@ def groupAllDocumentsTerms(filesFolderPath: str) -> list[list[str]]:
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
     groupedDocumentsTerms: list[list[str]] = []
     for fileName in filesName:
-        documentTerms: list[str] = getCleanTextFile(f'{filesFolderPath}/{fileName}')  
+        documentTerms: list[str] = objectExtension.getCleanTextFile(f'{filesFolderPath}/{fileName}')  
         groupedDocumentsTerms.append(documentTerms)
     
     return groupedDocumentsTerms
-
-def initializeDictionary(keys: list[any]) -> dict[any, 0]:
-    """
-    Inicializa um dicionionário com as chaves contidos em keys com todos os valores zerados
-    """
-    filledDictionary: dict[any, 0] = {}
-
-    for key in keys:
-        filledDictionary.update({key: 0})
-
-    return filledDictionary
 
 def getallDocumentsTermAppearences(filesFolderPath: str) -> dict[str, int]:
     """
@@ -188,7 +140,7 @@ def getallDocumentsTermAppearences(filesFolderPath: str) -> dict[str, int]:
     """
     allDocumentsTerms: list[list[str]] = groupAllDocumentsTerms(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
-    allDocumentsTermAppearences: dict[str, int] = initializeDictionary(vocabulary)
+    allDocumentsTermAppearences: dict[str, int] = objectExtension.initializeDictionary(vocabulary)
 
     for term in vocabulary:
         for documentTerms in allDocumentsTerms:
@@ -198,33 +150,6 @@ def getallDocumentsTermAppearences(filesFolderPath: str) -> dict[str, int]:
                 
     return allDocumentsTermAppearences
 
-def multiplyDictionaryValues(firstDict: dict[any, any], secondDict: dict[any, any]) -> dict[any, any]:
-    """
-    Realiza a multiplicação da chaves de dois dicionários e retorna um dicionário único com esses valores
-    calculados.
-    """
-
-    dictionaryResult: dict[any, any] = {}
-
-    if(len(firstDict) != len(secondDict)):
-        raise Exception("Não é possível realizar multiplicação!")
-
-    
-
-    for key in firstDict:
-        firstDictTermValue: any = firstDict.get(key) 
-        secondDictTermValue: any = secondDict.get(key)
-
-        if firstDictTermValue == None:
-            firstDictTermValue = 0
-        
-        if secondDictTermValue == None:
-            secondDictTermValue = 0
-
-        dictionaryResult.update({key: round(firstDictTermValue * secondDictTermValue,3)})
-
-    return dictionaryResult
-
 def calculateTfIdfPonderation(TFTable: list[dict[str, int]] , IDFTable: dict[str, int]) -> list[dict[str, int]]:
     """
     Recebe uma tabela com TF e outra com o IDF e retorna o TF_IDF calculado.
@@ -232,54 +157,8 @@ def calculateTfIdfPonderation(TFTable: list[dict[str, int]] , IDFTable: dict[str
     result: list[dict[str, int]] = []
 
     for TFDocument in TFTable:
-        result.append(multiplyDictionaryValues(TFDocument, IDFTable))
+        result.append(objectExtension.multiplyDictionaryValues(TFDocument, IDFTable))
     return result
-
-def transposeList(elements: list[list[any]]):
-    """
-    Recebe uma lista de lista qualquer e retorna a mesma transposta.
-    Será útil para faz a impressão dos dados na tela
-    """
-    return  list(map(list, zip(*elements)))
-
-def modelateDictionaryToList(elements: list[dict[str, int]]) -> list[list[str]]:
-    """
-    Recebe uma lista de dicionário e transforma numa lista de listas com as chaves do dicionário.
-    """
-    if elements == {}:
-        print('vazio')
-        return []
-
-    dictionaryKeys: list[any] = list(elements[0].keys())
-    dictionaryValues: list[list[any]] = [dictionaryKeys]
-    for element in elements:
-        dictionaryValues.append(convertListToStringList(list(element.values())))
-    
-    return transposeList(dictionaryValues)
-
-def setColumnsWidth(table: Table, width: float) -> None:
-    """
-    Define a largura das colunas da tabela que será impressa.
-    """
-    for i, column in enumerate(table.columns):
-        table.columns[i].width = width
-        
-def drawTable(tableBody: list[list[any]], Tableheader: list[str], TableTitle: str) -> None:
-    """
-    Recebe os dados de uma tabela qualquer e imprime os dados da mesmo de uma maneira personalizada.    
-    """
-    table = Table(title=TableTitle)
-
-    for headerColumn in Tableheader:
-        table.add_column(headerColumn)
-    
-    for bodyRow in tableBody:
-        table.add_row(*bodyRow, style='bright_green')
-
-    console = Console()
-    setColumnsWidth(table, 12)
-    table.columns[0].width = 18
-    console.print(table)
 
 def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
     """
@@ -289,7 +168,7 @@ def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
     filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
     documentsQuantity: int = len(filesName)
-    idfPondaration: dict[str, int] = initializeDictionary(vocabulary)
+    idfPondaration: dict[str, int] = objectExtension.initializeDictionary(vocabulary)
 
     for term in vocabulary:
         termValue: int = allDocumentsTermAppearences.get(term)
@@ -310,26 +189,20 @@ def generateHeaderTable(headerList: list[str], folderPath: str) -> list[str]:
     
     return headerList
 
-def convertListToStringList(elements: list[any]) -> list[str]:
-    """
-    Converte todos os itens de uma lista para string
-    """
-    return [str(i) for i in elements]
-
 def printTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:  
     """
     Imprime a tabela com o TF_IDF.
     """  
-    bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
-    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)
+    bodyTable: list[list[any]] = objectExtension.modelateDictionaryToList(TF_IDF_Table)
+    headerTable: list[str] = generateHeaderTable(["Termo"], constants.FILES_FOLDER_PATH)
 
-    drawTable(bodyTable, headerTable, "TF-IDF")
+    tableView.drawTable(bodyTable, headerTable, "TF-IDF")
 
 def getRelationshipDocumentTfIdf(TF_IDF_Table: list[dict[str, int]]) -> dict[str, list[any]]:
     structuredTfIdf: dict[str, list[any]] = {}
-    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)[1:]
-    model = modelateDictionaryToList(TF_IDF_Table)
-    bodyTable: list[list[any]] = transposeList(model)[1:]
+    headerTable: list[str] = generateHeaderTable(["Termo"], constants.FILES_FOLDER_PATH)[1:]
+    model = objectExtension.modelateDictionaryToList(TF_IDF_Table)
+    bodyTable: list[list[any]] = objectExtension.transposeList(model)[1:]
 
     for i, title in enumerate(headerTable):
         if len(bodyTable) > 0:
@@ -342,8 +215,8 @@ def getTfIdfUnifedMatrix(TF_IDF_Table: list[dict[str, int]]) -> list[list[any]]:
     """
     Imprime a tabela com o TF_IDF.
     """  
-    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)
-    bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
+    headerTable: list[str] = generateHeaderTable(["Termo"], constants.FILES_FOLDER_PATH)
+    bodyTable: list[list[any]] = objectExtension.modelateDictionaryToList(TF_IDF_Table)
 
     bodyTable.append(headerTable)
 
@@ -353,48 +226,16 @@ def printTfTable(TfTable: list[dict[str, int]]) -> None:
     """
     Imprime a tabela com o TF.
     """
-    bodyTable: list[list[any]] = modelateDictionaryToList(TfTable)
-    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)
+    bodyTable: list[list[any]] = objectExtension.modelateDictionaryToList(TfTable)
+    headerTable: list[str] = generateHeaderTable(["Termo"], constants.FILES_FOLDER_PATH)
 
-    drawTable(bodyTable, headerTable, "TF")
+    tableView.drawTable(bodyTable, headerTable, "TF")
 
 def printIdfTable(tfIdfTable: list[dict[str, int]]):
     """
     Imprime uma tabela com o IDF.
     """
-    bodyTable: list[list[any]] = modelateDictionaryToList(tfIdfTable)
+    bodyTable: list[list[any]] = objectExtension.modelateDictionaryToList(tfIdfTable)
     headerTable: list[str] = ["Termo", "IDFi = log(N/ni)"]
 
-    drawTable(bodyTable, headerTable, "IDF")
-
-def getDictionaryKeyByValue(dictionary: dict[any, any], searchValue: any) -> any:
-    """
-    Busca uma chave de um dicionário pelo valor dele
-    """
-    dictionaryKey: any = 0
-
-    for dictKey, dictValue in dictionary.items():
-        if dictValue == searchValue:
-            dictionaryKey = dictKey
-
-    return dictionaryKey
-
-def getMaxKeyList(listOfDicts: list[dict[any, any]]) -> list[str]:
-    """
-    Busca a chave do termo maior valor no vocabulário.
-    """
-    maxesKeysDict: list[any] = []
-    maxesValuesDict: list[int] = []
-    maxValue: any = 0
-
-    for dictionary in listOfDicts:
-        maxesValuesDict.append(max(dictionary.values()))
-
-    maxValue = max(maxesValuesDict)
-
-    for dictionary in listOfDicts:
-        maxValueKey: any = getDictionaryKeyByValue(dictionary, maxValue)
-        if maxValueKey != 0:
-            maxesKeysDict.append(maxValueKey)
-
-    return maxesKeysDict
+    tableView.drawTable(bodyTable, headerTable, "IDF")
