@@ -136,7 +136,6 @@ def calculateTFPonderation(documentTermsProportion: dict[str, int], vocabulary: 
     for term in vocabulary:
         termProportion: int = documentTermsProportion.get(term)
         tfPonderation: float = 0
-
         if(termProportion <= 0):
             tfPonderation = 0
         else:
@@ -209,10 +208,18 @@ def multiplyDictionaryValues(firstDict: dict[any, any], secondDict: dict[any, an
 
     if(len(firstDict) != len(secondDict)):
         raise Exception("Não é possível realizar multiplicação!")
- 
+
+    
+
     for key in firstDict:
         firstDictTermValue: any = firstDict.get(key) 
         secondDictTermValue: any = secondDict.get(key)
+
+        if firstDictTermValue == None:
+            firstDictTermValue = 0
+        
+        if secondDictTermValue == None:
+            secondDictTermValue = 0
 
         dictionaryResult.update({key: round(firstDictTermValue * secondDictTermValue,3)})
 
@@ -226,7 +233,6 @@ def calculateTfIdfPonderation(TFTable: list[dict[str, int]] , IDFTable: dict[str
 
     for TFDocument in TFTable:
         result.append(multiplyDictionaryValues(TFDocument, IDFTable))
-
     return result
 
 def transposeList(elements: list[list[any]]):
@@ -240,11 +246,15 @@ def modelateDictionaryToList(elements: list[dict[str, int]]) -> list[list[str]]:
     """
     Recebe uma lista de dicionário e transforma numa lista de listas com as chaves do dicionário.
     """
+    if elements == {}:
+        print('vazio')
+        return []
+
     dictionaryKeys: list[any] = list(elements[0].keys())
     dictionaryValues: list[list[any]] = [dictionaryKeys]
     for element in elements:
         dictionaryValues.append(convertListToStringList(list(element.values())))
-        
+    
     return transposeList(dictionaryValues)
 
 def setColumnsWidth(table: Table, width: float) -> None:
@@ -315,6 +325,30 @@ def printTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:
 
     drawTable(bodyTable, headerTable, "TF-IDF")
 
+def getRelationshipDocumentTfIdf(TF_IDF_Table: list[dict[str, int]]) -> dict[str, list[any]]:
+    structuredTfIdf: dict[str, list[any]] = {}
+    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)[1:]
+    model = modelateDictionaryToList(TF_IDF_Table)
+    bodyTable: list[list[any]] = transposeList(model)[1:]
+
+    for i, title in enumerate(headerTable):
+        if len(bodyTable) > 0:
+            structuredTfIdf.update({title: bodyTable[i]})
+                        
+    return structuredTfIdf
+
+
+def getTfIdfUnifedMatrix(TF_IDF_Table: list[dict[str, int]]) -> list[list[any]]:  
+    """
+    Imprime a tabela com o TF_IDF.
+    """  
+    headerTable: list[str] = generateHeaderTable(["Termo"], FILES_FOLDER_PATH)
+    bodyTable: list[list[any]] = modelateDictionaryToList(TF_IDF_Table)
+
+    bodyTable.append(headerTable)
+
+    return bodyTable[::-1]
+
 def printTfTable(TfTable: list[dict[str, int]]) -> None:
     """
     Imprime a tabela com o TF.
@@ -364,32 +398,3 @@ def getMaxKeyList(listOfDicts: list[dict[any, any]]) -> list[str]:
             maxesKeysDict.append(maxValueKey)
 
     return maxesKeysDict
-
-def showTFIDFStatistics() -> None:
-    """
-    Imprime todos os dados referentes ao TF_IDF. Assim como o tempo gasto na sua execução.
-    """
-    startTime: float = time.time()
-
-    tfTable: list[dict[str, int]] = calculateAllDocumentsTfPonderation(FILES_FOLDER_PATH)
-    idfTable: list[dict[str, int]] = calculateAllDocumentsIDFponderation(FILES_FOLDER_PATH)
-    tfIdfTable: list[dict[str, int]]= calculateTfIdfPonderation(tfTable, idfTable)
-
-    printTfIdfTable(tfIdfTable)
-    printPonderationDetails(tfIdfTable, FILES_FOLDER_PATH)
-
-    endTime: float = time.time()
-    executiontime: float = endTime - startTime 
-    print("Tempo de execução (TF-IDF):", round(executiontime, 2), "segundos")
-
-def showVocabularyStatistics() -> None:
-    """
-    Imprime o tempo gasto na execução da geração do vocabulário.
-    """
-    vocabularyStartTime: float = time.time()
-    vocabulary: list[str] = getMultipleFilesVocabulary(FILES_FOLDER_PATH)
-    vocabularyEndTime: float = time.time()
-
-    executionTimeVocabulary: float = vocabularyEndTime - vocabularyStartTime
-
-    print("Tempo de execução (Vocabulário):", round(executionTimeVocabulary, 5), "segundos")
