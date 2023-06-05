@@ -2,7 +2,22 @@ from unidecode import unidecode
 from Extensions import objectExtension
 import string
 from Extensions import file
+from nltk.tokenize import RegexpTokenizer
+import nltk
+from nltk.corpus import stopwords
 
+nltk.download('stopwords')
+
+def getEnglishStopWords(language: str) -> list[str]:
+    return list(set(stopwords.words(language)))
+
+def removeTextStopWords(stripedText: list[str]) -> list[str]:
+    stopwords: list[str] = getEnglishStopWords('english')
+    cleanText: list[str] = []
+    for textWord in stripedText:
+        if textWord not in stopwords:
+            cleanText.append(textWord)
+    return list(set(cleanText))
 
 def removeElementFromList(listElements: list[any], element: any) -> list[any]:
     """
@@ -115,14 +130,12 @@ def initializeDictionary(keys: list[any]) -> dict[any, 0]:
 
 def clearPunctuation(word: str) -> str:
     """
-    Recebe uma string com qualquer texto em questão e retorna esse mesmo texto sem nenhuma 
+    Recebe uma string com qualquer texto em questão e retorna uma lista do texto sem nenhuma 
     pontuação, formatação ou quebra de linha.
     """
-    word = word.replace('\n', ' ')
-    word = word.lower()
-    word = word.translate(str.maketrans('', '', string.punctuation.replace('-','')))
-    word = unidecode(word)
-    return word
+    tokenizer = RegexpTokenizer(r"[a-zA-Z0-9]+")
+
+    return tokenizer.tokenize(word)
 
 
 def convertListToStringList(elements: list[any]) -> list[str]:
@@ -149,7 +162,8 @@ def getStripedWords(fileContent: list[str]) -> list[str]:
     for line in fileContent:
         mergedContent += line
     
-    clearedText: list[str] = objectExtension.clearPunctuation(mergedContent).split(' ')
+    clearedText: list[str] = objectExtension.clearPunctuation(mergedContent)
+    clearedText: list[str] = removeTextStopWords(clearedText)    
     return clearedText
 
 def sortDictionaryDescending(dictionary: dict[any, any]) -> dict[any, any]:

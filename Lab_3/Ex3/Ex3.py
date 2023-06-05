@@ -3,6 +3,7 @@ from Extensions import constants
 from Extensions import vector
 from Extensions import objectExtension
 from Extensions import tableView
+import math
 
 def getQueryTfPonderation(query: str) -> list[dict[str, int]]:
     return [getQueryTermAppearences(query)]
@@ -84,8 +85,9 @@ def getQueryTermsProportion(query: str) -> dict[str, int]:
     return queryProportion
 
 def getQueryVocabulary(query: str) -> list[str]:
-    cleanText: list[str] = objectExtension.clearPunctuation(query).split(' ')
+    cleanText: list[str] = objectExtension.clearPunctuation(query)
     unrepeteadedText: list[str] = list(set(cleanText))
+    unrepeteadedText: list[str] = objectExtension.removeTextStopWords(unrepeteadedText)
 
     return unrepeteadedText
     
@@ -149,6 +151,8 @@ def main():
     similarity = getQuerySimilarityByDocument(tfIdfDocument, query)
     
     printSimilarityTable(similarity, query)
+    # print('teste', objectExtension.clearPunctuation("textão com pontuação"))
+    # print('english stopwords: ', getEnglishStopWords())
 
 if __name__ == "__main__":
     main()
