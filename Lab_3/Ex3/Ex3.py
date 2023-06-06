@@ -3,6 +3,7 @@ from Extensions import constants
 from Extensions import vector
 from Extensions import objectExtension
 from Extensions import tableView
+from Extensions import file
 import math
 
 def getQueryTfPonderation(query: str) -> list[dict[str, int]]:
@@ -30,6 +31,7 @@ def getQueryTermAppearences(query: str) -> dict[str, int]:
     """
     queryTerms: list[list[str]] = getQueryTerms(query)
     vocabulary: list[str] = getQueryVocabulary(query)
+
     queryTermsAppearence: dict[str, int] = objectExtension.initializeDictionary(vocabulary)
 
     for term in vocabulary:
@@ -60,7 +62,7 @@ def getQueryTfIdfPonderation(query: str) -> list[dict[str, int]]:
     tfTable: list[dict[str, int]] = getQueryTfPonderation(query)
     idfTable: dict[str, int] = getQueryIDFponderation(query)    
 
-    return tfIdfExtension.calculateTfIdfPonderation(tfTable, idfTable) 
+    return tfIdfExtension.calculateTfIdfPonderation(tfTable, idfTable)
 
 def getDocumentTfIdfPonderation() -> list[dict[str, int]]:
     tfTable: list[dict[str, int]] = tfIdfExtension.calculateAllDocumentsTfPonderation(constants.FILES_FOLDER_PATH)
@@ -98,7 +100,20 @@ def printSimilarityTable(similarityTable: dict, query: str) -> None:
     bodyTable: list[list[any]] = objectExtension.modelateDictionaryToList([similarityTable])
     headerTable: list[str] = ["Documento","Similaridade"]
 
+    if similarityTable == {}:
+        bodyTable = generateEmptySimilarityBody()
+    
+    print(bodyTable)
     tableView.drawTable(bodyTable, headerTable, f"MODELO VETORIAL - '{query}'")
+
+def generateEmptySimilarityBody() -> list[str]:
+    body: list[list[str, str]] = []
+    filesName: list[str] = file.getAllFileNamesFromFolder(constants.FILES_FOLDER_PATH)
+
+    for fileName in filesName:
+        body.append([fileName, '0.0'])
+
+    return body
 
 def printQueryTfIdfTable(TF_IDF_Table: list[dict[str, int]]) -> None:  
     """
@@ -129,6 +144,10 @@ def getFilteredTfIdfByTerms(terms: list[str], tfIdfTable: list[dict[str, int]]) 
 
 def getQueryVector(tfIdfTableQuery: list[dict[str, int]]) -> list[float]:
     modelatedQuery = objectExtension.modelateDictionaryToList(tfIdfTableQuery)
+
+    if modelatedQuery == []:
+        return []
+    
     return objectExtension.transposeList(modelatedQuery)[1]
 
 def getQuerySimilarityByDocument(tfIdfDocument: list[dict[str, float]], query: str) -> dict[str, float]:

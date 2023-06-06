@@ -9,7 +9,9 @@ from nltk.corpus import stopwords
 nltk.download('stopwords')
 
 def getEnglishStopWords(language: str) -> list[str]:
-    return list(set(stopwords.words(language)))
+    textStopwords: list[str] =  list(set(stopwords.words(language)))
+    loweredStopWords: list[str] = [letter.lower() for letter in textStopwords]
+    return loweredStopWords
 
 def removeTextStopWords(stripedText: list[str]) -> list[str]:
     stopwords: list[str] = getEnglishStopWords('english')
@@ -17,6 +19,7 @@ def removeTextStopWords(stripedText: list[str]) -> list[str]:
     for textWord in stripedText:
         if textWord not in stopwords:
             cleanText.append(textWord)
+    
     return list(set(cleanText))
 
 def removeElementFromList(listElements: list[any], element: any) -> list[any]:
@@ -134,7 +137,6 @@ def clearPunctuation(word: str) -> str:
     pontuação, formatação ou quebra de linha.
     """
     tokenizer = RegexpTokenizer(r"[a-zA-Z0-9]+")
-
     return tokenizer.tokenize(word)
 
 

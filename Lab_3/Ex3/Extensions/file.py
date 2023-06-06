@@ -1,3 +1,5 @@
+import os
+
 def readFile(fileName: str) -> list[str]:
     """
     Recebe o nome de um arquivo e retorna uma lista com o conteúdo dele.
@@ -18,3 +20,9 @@ def writeFile(newfileName: str, fileContent: list[str]) -> None:
         print(f"Arquivo {newfileName} gerado com sucesso!")
     except:
         print("Erro ao tentar escrever no arquivo!")
+
+def getAllFileNamesFromFolder(folderPath: str) -> list[str]:
+    """
+    Busca o nome de todos os arquivos contidos no diretório do caminho contido em folderPath
+    """
+    return os.listdir(folderPath)    
