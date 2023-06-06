@@ -2,6 +2,7 @@ from unidecode import unidecode
 from Extensions import objectExtension
 import string
 from Extensions import file
+from unidecode import unidecode
 from nltk.tokenize import RegexpTokenizer
 import nltk
 from nltk.corpus import stopwords
@@ -21,6 +22,12 @@ def removeTextStopWords(stripedText: list[str]) -> list[str]:
             cleanText.append(textWord)
     
     return list(set(cleanText))
+
+def removeNumbersFromString(phrase: str) -> str:
+    splitedPhrase: list[str] = phrase.split(' ')
+    cleanText: list[str] = [word for word in splitedPhrase if word.isalpha()]
+
+    return " ".join(cleanText)
 
 def removeElementFromList(listElements: list[any], element: any) -> list[any]:
     """
@@ -131,13 +138,19 @@ def initializeDictionary(keys: list[any]) -> dict[any, 0]:
 
     return filledDictionary
 
+
+
 def clearPunctuation(word: str) -> str:
     """
-    Recebe uma string com qualquer texto em questão e retorna uma lista do texto sem nenhuma 
+    Recebe uma string com qualquer texto em questão e retorna esse mesmo texto sem nenhuma 
     pontuação, formatação ou quebra de linha.
     """
-    tokenizer = RegexpTokenizer(r"[a-zA-Z0-9]+")
-    return tokenizer.tokenize(word)
+    word = word.replace('\n', ' ')
+    word = word.lower()
+    word = word.translate(str.maketrans('', '', string.punctuation.replace('-','')))
+    word = unidecode(word)    
+    word = removeNumbersFromString(word)
+    return word
 
 
 def convertListToStringList(elements: list[any]) -> list[str]:

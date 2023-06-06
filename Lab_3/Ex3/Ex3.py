@@ -103,7 +103,6 @@ def printSimilarityTable(similarityTable: dict, query: str) -> None:
     if similarityTable == {}:
         bodyTable = generateEmptySimilarityBody()
     
-    print(bodyTable)
     tableView.drawTable(bodyTable, headerTable, f"MODELO VETORIAL - '{query}'")
 
 def generateEmptySimilarityBody() -> list[str]:
@@ -170,8 +169,6 @@ def main():
     similarity = getQuerySimilarityByDocument(tfIdfDocument, query)
     
     printSimilarityTable(similarity, query)
-    # print('teste', objectExtension.clearPunctuation("textão com pontuação"))
-    # print('english stopwords: ', getEnglishStopWords())
 
 if __name__ == "__main__":
     main()
