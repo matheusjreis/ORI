@@ -20,7 +20,7 @@ print(helena_clean_text)
 
 nltk.download('stopwords')
 
-stopwords = nltk.corpus.stopwords.words('portuguese')
+stopwords = nltk.corpus.stopwords.words('english')
 
 print(stopwords)
 
@@ -39,10 +39,10 @@ print(no_stemming_helena_text)
 freq_sem_stem = FreqDist(no_stemming_helena_text)
 freq_com_stem = FreqDist(stemming_helena_text)
 
-print("20 palavras mais frequentes sem stem:")
+print("20 palavras mais frequentes sem stemming:")
 print(freq_sem_stem.most_common(20))
 
-print("20 palavras mais frequentes com stem:")
+print("20 palavras mais frequentes com stemming:")
 print(freq_com_stem.most_common(20))
 
 plt.figure(figsize = (13, 8))
