@@ -2,11 +2,10 @@ from Extensions import file
 from Extensions import objectExtension
 from Extensions import constants
 from Extensions import tableView
-import os
 import math
 
 def getMergedFilesContent(folderPath: str) -> list[str]:
-    directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
+    directoryFilesName: list[str] = file.getAllFileNamesFromFolder(folderPath)
     mergedTextContent: list[str] = []
 
     for fileName in directoryFilesName:
@@ -20,7 +19,7 @@ def printPonderationDetails(TF_IDFTable: list[dict[str, int]], fileFolderPath: s
     print(f"Termo(s) com maior frequência: {objectExtension.getMaxKeyList(TF_IDFTable)}")
 
 def getMultipleFilesVocabulary(folderPath: str) -> list[str]:
-    directoryFilesName: list[str] = getAllFileNamesFromFolder(folderPath)
+    directoryFilesName: list[str] = file.getAllFileNamesFromFolder(folderPath)
     mergedVocabulary: list[str] = []
 
     for fileName in directoryFilesName:
@@ -59,12 +58,6 @@ def getBagOfWords(vocabulary: list[str], document: list[str]) -> list[int]:
             bafOfWords.append(termAbsence)
     return bafOfWords
 
-def getAllFileNamesFromFolder(folderPath: str) -> list[str]:
-    """
-    Busca o nome de todos os arquivos contidos no diretório do caminho contido em folderPath
-    """
-    return os.listdir(folderPath)
-
 def calculateDocumentTermsProportion(documentfolderPath: str, vocabulary: list[str]) -> dict[str, int]:
     """
     Calcula a quantidade de ocorrências de determinado termo do vocabulário no documento contido em documentfolderPath
@@ -83,7 +76,7 @@ def calculateAllDocumentsTermsProportion(filesFolderPath: str) -> list[dict[str,
     Calcula proporção da ocorrência dos termos do vocabulário para com todos os documentos.
     """
     tableTermsProportion: list[dict[str, int]] = []
-    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    filesName: list[str] = file.getAllFileNamesFromFolder(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
 
     for fileName in filesName:
@@ -113,7 +106,7 @@ def calculateAllDocumentsTfPonderation(filesFolderPath: str) -> list[dict[str, i
     função calculateTFPonderation.
     """
     tableTFPonderation: list[dict[str, int]] = []
-    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    filesName: list[str] = file.getAllFileNamesFromFolder(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
 
     for fileName in filesName:
@@ -126,7 +119,7 @@ def groupAllDocumentsTerms(filesFolderPath: str) -> list[list[str]]:
     """
     Agrupa os termos de todos os documentos contidos no diretório de caminho filesFolderPath
     """
-    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    filesName: list[str] = file.getAllFileNamesFromFolder(filesFolderPath)
     groupedDocumentsTerms: list[list[str]] = []
     for fileName in filesName:
         documentTerms: list[str] = objectExtension.getCleanTextFile(f'{filesFolderPath}/{fileName}')  
@@ -166,7 +159,7 @@ def calculateAllDocumentsIDFponderation(filesFolderPath: str) -> dict[str, int]:
     """
     allDocumentsTermAppearences: dict[str, int] = getallDocumentsTermAppearences(filesFolderPath)
     vocabulary: list[str] = getMultipleFilesVocabulary(filesFolderPath)
-    filesName: list[str] = getAllFileNamesFromFolder(filesFolderPath)
+    filesName: list[str] = file.getAllFileNamesFromFolder(filesFolderPath)
     documentsQuantity: int = len(filesName)
     idfPondaration: dict[str, int] = objectExtension.initializeDictionary(vocabulary)
 
@@ -181,7 +174,7 @@ def generateHeaderTable(headerList: list[str], folderPath: str) -> list[str]:
     """
     Desenha o header de uma tabela qualquer.
     """
-    documentsNames: list[str] = getAllFileNamesFromFolder(folderPath)
+    documentsNames: list[str] = file.getAllFileNamesFromFolder(folderPath)
     headerList: list[str] = headerList
 
     for documentName in documentsNames:
